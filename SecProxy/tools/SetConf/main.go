@@ -13,14 +13,13 @@ const (
 	EtcdKey = "/oldboy/backend/secskill/product"
 )
 
-// SecInfoConf 秒杀商品相关信息的结构体
 type SecInfoConf struct {
-	ProductId int //商品的ID
-	StartTime int // 秒杀开始时间
-	EndTime   int // 秒杀结束时间
-	Status    int // 秒杀商品的状态
-	Total     int // 商品的总数
-	Left      int // 剩余商品数量
+	ProductId int
+	StartTime int
+	EndTime   int
+	Status    int
+	Total     int
+	Left      int
 }
 
 func SetLogConfToEtcd() {

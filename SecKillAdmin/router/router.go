@@ -1,9 +1,10 @@
 package router
 
 import (
+	"CommoditySpike/SecKillAdmin/controller/activity"
+	"CommoditySpike/SecKillAdmin/controller/product"
+
 	"github.com/astaxie/beego"
-	"go_dev/day14/SecKill/SecAdmin/controller/product"
-	"go_dev/day14/SecKill/SecAdmin/controller/activity"
 )
 
 func init() {

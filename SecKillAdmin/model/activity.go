@@ -3,35 +3,36 @@ package model
 import (
 	"github.com/astaxie/beego/logs"
 	_ "github.com/go-sql-driver/mysql"
+
 	//"github.com/jmoiron/sqlx"
 	"time"
 	//"errors"
-	"fmt"
-	"encoding/json"
 	"context"
+	"encoding/json"
+	"fmt"
 	"strings"
 )
 
 const (
-	ActivityStatusNormal = 0
+	ActivityStatusNormal  = 0
 	ActivityStatusDisable = 1
-	ActivityStatusExpire = 2
+	ActivityStatusExpire  = 2
 )
 
 type Activity struct {
-	ActivityId int `db:"id"`
+	ActivityId   int    `db:"id"`
 	ActivityName string `db:"name"`
-	ProductId int `db:"product_id"`
-	StartTime int64 `db:"start_time"`
-	EndTime int64 `db:"end_time"`
-	Total int `db:"total"`
-	Status int `db:"status"`
+	ProductId    int    `db:"product_id"`
+	StartTime    int64  `db:"start_time"`
+	EndTime      int64  `db:"end_time"`
+	Total        int    `db:"total"`
+	Status       int    `db:"status"`
 
 	StartTimeStr string
-	EndTimeStr string
-	StatusStr string
-	Speed int `db:"sec_speed"`
-	BuyLimit int `db:"buy_limit"`
+	EndTimeStr   string
+	StatusStr    string
+	Speed        int `db:"sec_speed"`
+	BuyLimit     int `db:"buy_limit"`
 }
 
 type SecProductInfoConf struct {
@@ -48,10 +49,9 @@ type SecProductInfoConf struct {
 }
 
 type ActivityModel struct {
-
 }
 
-func NewActivityModel() *ActivityModel{
+func NewActivityModel() *ActivityModel {
 	return &ActivityModel{}
 }
 
@@ -87,9 +87,9 @@ func (p *ActivityModel) GetActivityList() (activityList []*Activity, err error) 
 	return
 }
 
-func (p *ActivityModel) ProductValid(productId int, total int)(valid bool, err error) {
+func (p *ActivityModel) ProductValid(productId int, total int) (valid bool, err error) {
 	sql := "select id, name, total, status from product where id=?"
-	var productList[]*Product
+	var productList []*Product
 	err = Db.Select(&productList, sql, productId)
 	if err != nil {
 		logs.Warn("select product failed, err:%v", err)
@@ -111,7 +111,7 @@ func (p *ActivityModel) ProductValid(productId int, total int)(valid bool, err e
 }
 
 func (p *ActivityModel) CreateActivity(activity *Activity) (err error) {
-	
+
 	valid, err := p.ProductValid(activity.ProductId, activity.Total)
 	if err != nil {
 		logs.Error("product exists failed, err:%v", err)
@@ -142,15 +142,15 @@ func (p *ActivityModel) CreateActivity(activity *Activity) (err error) {
 		logs.Error(err)
 		return
 	}
-	
+
 	sql := "insert into activity(name, product_id, start_time, end_time, total, sec_speed, buy_limit)values(?,?,?,?,?,?,?)"
-	_, err = Db.Exec(sql, activity.ActivityName, activity.ProductId, 
+	_, err = Db.Exec(sql, activity.ActivityName, activity.ProductId,
 		activity.StartTime, activity.EndTime, activity.Total, activity.Speed, activity.BuyLimit)
 	if err != nil {
 		logs.Warn("select from mysql failed, err:%v sql:%v", err, sql)
 		return
 	}
-	
+
 	logs.Debug("insert into database succ")
 	err = p.SyncToEtcd(activity)
 	if err != nil {
@@ -166,11 +166,11 @@ func (p *ActivityModel) SyncToEtcd(activity *Activity) (err error) {
 		EtcdPrefix = EtcdPrefix + "/"
 	}
 
-	etcdKey  := fmt.Sprintf("%s%s", EtcdPrefix, EtcdProductKey)
+	etcdKey := fmt.Sprintf("%s%s", EtcdPrefix, EtcdProductKey)
 	secProductInfoList, err := loadProductFromEtcd(etcdKey)
 
 	var secProductInfo SecProductInfoConf
-	secProductInfo.EndTime =  activity.EndTime
+	secProductInfo.EndTime = activity.EndTime
 	secProductInfo.OnePersonBuyLimit = activity.BuyLimit
 	secProductInfo.ProductId = activity.ProductId
 	secProductInfo.SoldMaxLimit = activity.Speed
@@ -193,8 +193,6 @@ func (p *ActivityModel) SyncToEtcd(activity *Activity) (err error) {
 	}
 	return
 }
-
-
 
 func loadProductFromEtcd(key string) (secProductInfo []SecProductInfoConf, err error) {
 
@@ -219,13 +217,13 @@ func loadProductFromEtcd(key string) (secProductInfo []SecProductInfoConf, err e
 		logs.Debug("sec info conf is [%v]", secProductInfo)
 	}
 
-/*
-	updateSecProductInfo(conf, secProductInfo)
-	logs.Debug("update product info succ, data:%v", secProductInfo)
+	/*
+		updateSecProductInfo(conf, secProductInfo)
+		logs.Debug("update product info succ, data:%v", secProductInfo)
 
-	initSecProductWatcher(conf)
+		initSecProductWatcher(conf)
 
-	logs.Debug("init etcd watcher succ")
+		logs.Debug("init etcd watcher succ")
 	*/
 	return
 }

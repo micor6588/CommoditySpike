@@ -12,7 +12,7 @@ const (
 	ProductStatusSaleOut      = 1
 	ProductStatusForceSaleOut = 2
 )
-
+// Redis数据库配置
 type RedisConf struct {
 	RedisAddr        string
 	RedisMaxIdle     int

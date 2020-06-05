@@ -73,7 +73,6 @@ func convertLogLevel(level string) int {
 	return logs.LevelDebug
 }
 
-// initLogger 初始化日志
 func initLogger() (err error) {
 	config := make(map[string]interface{})
 	config["filename"] = secKillConf.LogPath
@@ -89,7 +88,6 @@ func initLogger() (err error) {
 	return
 }
 
-// 加载秒杀的配置
 func loadSecConf() (err error) {
 
 	resp, err := etcdClient.Get(context.Background(), secKillConf.EtcdConf.EtcdSecProductKey)
@@ -170,12 +168,12 @@ func watchSecProductKey(key string) {
 
 		for wresp := range rch {
 			for _, ev := range wresp.Events {
-				if ev.Type == mvccpb.DELETE {
+				if int32(ev.Type) == int32(mvccpb.DELETE) {
 					logs.Warn("key[%s] 's config deleted", key)
 					continue
 				}
 
-				if ev.Type == mvccpb.PUT && string(ev.Kv.Key) == key {
+				if int32(ev.Type) == int32(mvccpb.PUT) && string(ev.Kv.Key) == key {
 					err = json.Unmarshal(ev.Kv.Value, &secProductInfo)
 					if err != nil {
 						logs.Error("key [%s], Unmarshal[%s], err:%v ", err)
@@ -198,6 +196,7 @@ func watchSecProductKey(key string) {
 func updateSecProductInfo(secProductInfo []service.SecProductInfoConf) {
 
 	var tmp map[int]*service.SecProductInfoConf = make(map[int]*service.SecProductInfoConf, 1024)
+
 	for _, v := range secProductInfo {
 		produtInfo := v
 		tmp[v.ProductId] = &produtInfo

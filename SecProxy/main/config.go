@@ -13,7 +13,7 @@ import (
 // secKillConf 定义全局变量来保存配置
 var (
 	secKillConf = &service.SecSkillConf{
-		SecProductInfoMap: make(map[int]*service.SecProductInfoConf, 1024),
+		SecProductInfoMap: make(map[int]*service.SecProductInfoConf, 1024), // 初始化字典
 	}
 )
 
